@@ -1,14 +1,14 @@
 package com.letter.member.repository;
 
 import com.letter.member.entity.InviteOpponent;
+import com.letter.member.entity.Member;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import static com.letter.member.entity.QCouple.couple;
-import static com.letter.member.entity.QMember.member;
-import static com.letter.question.entity.QSelectQuestion.selectQuestion;
+import java.time.LocalDateTime;
+
 import static com.letter.member.entity.QInviteOpponent.inviteOpponent;
 import static com.letter.question.entity.QQuestion.question;
 
@@ -53,5 +53,52 @@ public class InviteOpponentCustomRepositoryImpl implements InviteOpponentCustomR
                 .where(inviteOpponent.member.id.eq(memberId)
                         .and(inviteOpponent.isShow.eq("N")))
                 .fetchFirst() != null;
+    }
+
+    /**
+     * 회원 아이디와 등록일자로 데이터가 있는지 확인
+     * @param memberId
+     * @return
+     */
+    public InviteOpponent existByMemberIdAndCreatedAt(String memberId){
+
+        LocalDateTime minutesAgo = LocalDateTime.now().minusDays(1);
+
+        return jpaQueryFactory
+                        .select(inviteOpponent)
+                        .from(inviteOpponent)
+                        .where(inviteOpponent.member.id.eq(memberId)
+                                .and(inviteOpponent.createdAt.after(minutesAgo)))
+                        .orderBy(inviteOpponent.createdAt.desc())
+                        .fetchFirst();
+    }
+
+    /**
+     * 링크 키와 등록일자로 해당 데이터가 있는지 확인
+     * @param linkKey
+     * @return
+     */
+    public InviteOpponent existByLinkKeyAndCreatedAt(String linkKey){
+
+        LocalDateTime minutesAgo = LocalDateTime.now().minusDays(1);
+
+        return jpaQueryFactory
+                .select(inviteOpponent)
+                .from(inviteOpponent)
+                .where(inviteOpponent.linkKey.eq(linkKey)
+                        .and(inviteOpponent.createdAt.after(minutesAgo)))
+                .orderBy(inviteOpponent.createdAt.desc())
+                .fetchFirst();
+    }
+
+
+    public String getLinkKey(Member member) {
+        return jpaQueryFactory
+                .select(inviteOpponent.linkKey)
+                .from(inviteOpponent)
+                .where(inviteOpponent.member.eq(member),
+                        inviteOpponent.createdAt.after(LocalDateTime.now().minusDays(1)),
+                        inviteOpponent.isShow.eq("Y"))
+                .fetchOne();
     }
 }

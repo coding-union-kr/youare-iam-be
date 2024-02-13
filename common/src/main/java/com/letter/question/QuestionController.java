@@ -65,7 +65,7 @@ public class QuestionController {
             @RequestParam(
                     name = "next-cursor",
                     required = false,
-                    defaultValue = "1"
+                    defaultValue = "0"
             ) int nextCursor,
             @User Member member) {
         return questionService.getLetterList(nextCursor, member);

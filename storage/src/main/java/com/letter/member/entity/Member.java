@@ -4,6 +4,7 @@ import com.letter.member.dto.OAuthResponse;
 import com.letter.question.entity.Answer;
 import com.letter.question.entity.RegisterQuestion;
 import com.letter.security.CryptoStringConverter;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Hidden
 @Getter
 @Setter
 @Entity
@@ -37,8 +39,7 @@ public class Member {
     private Long kakaoId;
 
     @Size(max = 100)
-    @NotNull
-    @Column(name = "REFRESH_TOKEN", nullable = false, length = 100)
+    @Column(name = "REFRESH_TOKEN", length = 100)
     private String refreshToken;
 
     @Size(max = 50)
@@ -101,6 +102,11 @@ public class Member {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public void resetRefreshToken() {
+        this.refreshToken = null;
+    }
+
 
     /**
      * 회원 아이디 생성(등록날짜+총 회원 수 마지막 + 1, 총 13자리)

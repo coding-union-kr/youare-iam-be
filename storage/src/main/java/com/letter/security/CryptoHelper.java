@@ -14,8 +14,6 @@ import java.util.Base64;
 @Component
 public class CryptoHelper {
 
-//    @Value(staticConstructor = "${}")
-//    private String abc;
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
@@ -42,9 +40,6 @@ public class CryptoHelper {
      */
     public String encryptToString(String plainText) {
         try {
-            System.out.println("valueKey = " + valueKey);
-            System.out.println("ivKey = " + iv);
-
             byte[] KEY = valueKey.getBytes();
             IvParameterSpec ivKey = new IvParameterSpec(iv.getBytes("UTF-8"));
 
@@ -69,9 +64,6 @@ public class CryptoHelper {
      */
     public String decryptToString(String encryptedText) {
         try{
-            System.out.println("valueKey = " + valueKey);
-            System.out.println("ivKey = " + iv);
-
             byte[] KEY = valueKey.getBytes();
             IvParameterSpec ivKey = new IvParameterSpec(iv.getBytes("UTF-8"));
 

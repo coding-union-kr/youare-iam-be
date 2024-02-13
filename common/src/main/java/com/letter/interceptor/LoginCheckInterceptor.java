@@ -38,7 +38,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         else if(request.getRequestURI().contains("/api") && loginCheck != null) {
 
             String token = jwtProvider.bringToken(request);
-            jwtProvider.validateToken(token);
+            jwtProvider.validateToken(token, JwtProvider.ACCESS_TYPE);
             String memberId = jwtProvider.getUserInfoFromToken(token);
             final Optional<Member> member = memberRepository.findById(memberId);
 

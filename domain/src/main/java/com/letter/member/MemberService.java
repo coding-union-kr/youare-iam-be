@@ -2,9 +2,10 @@ package com.letter.member;
 
 import com.letter.exception.CustomException;
 import com.letter.exception.ErrorCode;
-import com.letter.jwt.JwtProvider;
 import com.letter.member.dto.MemberRequest;
 import com.letter.member.dto.MemberResponse;
+import com.letter.member.dto.MemberStatusResponse;
+import com.letter.member.dto.role.UserStatusRole;
 import com.letter.member.entity.Couple;
 import com.letter.member.entity.InviteOpponent;
 import com.letter.member.entity.Member;
@@ -17,7 +18,6 @@ import com.letter.question.repository.QuestionRepository;
 import com.letter.question.repository.SelectQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,9 +34,8 @@ public class MemberService {
     private final AnswerRepository answerRepository;
     private final SelectQuestionRepository selectQuestionRepository;
 
-    private final JwtProvider jwtProvider;
     private final InviteOpponentCustomRepositoryImpl inviteOpponentCustomRepository;
-    private final MemberCustomRepositoryImpl memberCustomRepository;
+
 
     /**
      * 상대 초대 링크 생성 api
@@ -51,14 +50,22 @@ public class MemberService {
             log.error("이미 커플이 된 회원입니다.");
             throw new CustomException(ErrorCode.ALREADY_COUPLE);
         }
-        // TODO:기존에 보낸 초대 링크가 있다면 초대 링크 키의 유효시간 체크. 링크 키가 생성된지 3일 이내 이면 초대 링크 생성 불가
+
+        // 기존에 보낸 초대 링크가 있다면 초대 링크 키의 유효시간 체크. 링크 키가 생성된지 3일 이내 이면 초대 링크 생성 불가
+        InviteOpponent existLinkData = inviteOpponentCustomRepository.existByMemberIdAndCreatedAt(member.getId());
+
+        if(existLinkData != null){
+            log.error("기존에 생성된 초대링크가 있습니다.");
+            throw new CustomException(ErrorCode.ALREADY_LINK);
+        }
 
         // 링크 고유 키 생성
         String uuid = UUID.randomUUID().toString();
 
         // 질문 아이디 조회
         Question question = questionRepository.findQuestionById(request.getQuestionId()).orElseThrow(
-                () -> new RuntimeException(HttpStatus.BAD_REQUEST.name()));
+                () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
+        );
 
         // 상대 초대 테이블에 정보 request 셋팅
         InviteOpponent inviteOpponent = request.toCreateInviteLink(uuid, question, member);
@@ -74,6 +81,8 @@ public class MemberService {
                 .build();
     }
 
+
+
     /**
      * 초대 수락 API
      *
@@ -85,8 +94,14 @@ public class MemberService {
 
         // 링크 고유 값으로 상대 초대 테이블에 해당 회원 조회
         InviteOpponent inviteOpponent = inviteOpponentRepository.findQuestionByLinkKey(request.getLinkKey()).orElseThrow(
-                () -> new RuntimeException(HttpStatus.BAD_REQUEST.name())
+                () -> new CustomException(ErrorCode.BAD_REQUEST)
         );
+
+        // 초대한 사람의 아이디와 초대된 사람의 아이디가 같을 경우 에러 처리
+        if(inviteOpponent.getMember().getId().equals(member.getId())){
+            log.info("초대한 사람의 아이디와 초대된 사람의 아이디가 같습니다.");
+            throw new CustomException(ErrorCode.MEMBER_BAD_REQUEST);
+        }
 
         Member findMember = memberRepository.findById(inviteOpponent.getMember().getId()).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -104,6 +119,8 @@ public class MemberService {
             throw new CustomException(ErrorCode.ALREADY_COUPLE);
         }
 
+        // TODO 쿼리 보내는 것을 줄여보기
+
         //상대 초대 테이블에 노출 여부가 N인 경우 에러처리
         boolean isExistIsShowN = inviteOpponentCustomRepository.existByMemberIdAndIsShow(member.getId());
 
@@ -112,18 +129,20 @@ public class MemberService {
             throw new CustomException(ErrorCode.ALREADY_COUPLE);
         }
 
+        // 초대 링크 키의 유효시간 체크. 링크 키가 생성된지 1일 이내 이면 초대 수락 불가
+        InviteOpponent existValidLink = inviteOpponentCustomRepository.existByLinkKeyAndCreatedAt(request.getLinkKey());
+
+        if(existValidLink == null){
+            log.error("해당 링크는 유효시간이 만료되었습니다.");
+            throw new CustomException(ErrorCode.EXPIRED_LINK);
+        }
+
         // 커플 정보 request 셋팅
         // 선택 질문 테이블 등록될 때 자동으로 등록 됨
         Couple couple = request.toCoupleInfo();
 
         if (Objects.isNull(inviteOpponent.getQuestion())) {
             log.error("질문 아이디가 null 입니다.");
-        }
-
-        // 초대한 사람의 아이디와 초대된 사람의 아이디가 같을 경우 에러 처리
-        if(inviteOpponent.getMember().equals(member.getId())){
-            log.info("초대한 사람의 아이디와 초대된 사람의 아이디가 같습니다.");
-            throw new CustomException(ErrorCode.MEMBER_BAD_REQUEST);
         }
 
         // 회원 테이블에 커플 아이디 업데이트(초대한 회원)
@@ -155,8 +174,6 @@ public class MemberService {
         // 답변 테이블에 정보 등록
         answerRepository.saveAll(answers);
 
-
-
         // 초대 상대 테이블에 노출 여부 'N' 으로 변경
         inviteOpponentCustomRepository.updateIsShow(inviteOpponent.getMember().getId());
 
@@ -164,6 +181,8 @@ public class MemberService {
                 .selectedQuestionId(selectQuestion.getId())
                 .build();
     }
+
+
 
     /**
      * 초대 링크로 랜딩되는 페이지 관련 API
@@ -189,4 +208,22 @@ public class MemberService {
                 .question(question)
                 .build();
     }
+
+
+
+    // TODO 개발자 주석 추가
+    public MemberStatusResponse getUserStatus(Member member) {
+        boolean isCouple = member.getCouple() != null;
+        String linkKey = inviteOpponentCustomRepository.getLinkKey(member);
+
+        UserStatusRole userStatus;
+        if (isCouple) {
+            userStatus = UserStatusRole.COUPLE_USER;
+        } else {
+            userStatus = linkKey == null ? UserStatusRole.NON_COUPLE_USER : UserStatusRole.COUPLE_WAITING_USER;
+        }
+
+        return new MemberStatusResponse(userStatus, linkKey);
+    }
+
 }

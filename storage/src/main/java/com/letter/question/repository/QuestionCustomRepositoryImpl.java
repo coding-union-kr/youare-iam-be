@@ -47,7 +47,7 @@ public class QuestionCustomRepositoryImpl implements QuestionCustomRepository {
     }
 
     public List<LetterDetailResponse> findAllByCoupleAndNextCursor(Couple couple, int nextCursor) {
-        if (nextCursor == 1) {
+        if (nextCursor == 0) {
             return jpaQueryFactory
                     .select(Projections.bean(LetterDetailResponse.class,
                             selectQuestion.id.as("selectQuestionId"),

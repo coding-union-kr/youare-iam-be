@@ -4,9 +4,15 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.util.Collections;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -19,9 +25,24 @@ import org.springframework.context.annotation.Profile;
 public class SwaggerConfig {
 
     @Bean
-    @Profile("!Prod")   // Product 환경에서는 Swagger 비활성화
     public OpenAPI openAPI() {
+        SecurityScheme securityScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
+
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
+
+        Operation operation = new Operation();
+        operation.setOperationId("login");
+        operation.setSecurity(Collections.emptyList());
+
         return new OpenAPI()
-                .components(new Components());
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", securityScheme))
+                .addSecurityItem(securityRequirement)
+                .path("/api/v1/members/kakao/callback", new PathItem()
+                        .get(operation)
+                );
     }
 }

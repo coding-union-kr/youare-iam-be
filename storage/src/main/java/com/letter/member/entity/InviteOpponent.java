@@ -1,6 +1,7 @@
 package com.letter.member.entity;
 
 import com.letter.question.entity.Question;
+import com.letter.security.CryptoStringConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,7 +12,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.time.LocalDateTime;
 
@@ -44,6 +44,7 @@ public class InviteOpponent {
     private String linkKey;
 
     @NotNull
+    @Convert(converter = CryptoStringConverter.class)
     @Column(name = "ANS", nullable = false, length = 1000)
     private String answer;
 

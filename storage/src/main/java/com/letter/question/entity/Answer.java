@@ -2,6 +2,7 @@ package com.letter.question.entity;
 
 import com.letter.member.entity.Couple;
 import com.letter.member.entity.Member;
+import com.letter.security.CryptoStringConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -47,6 +47,7 @@ public class Answer {
 
     @Size(max = 1000)
     @NotNull
+    @Convert(converter = CryptoStringConverter.class)
     @Column(name = "ANS", nullable = false, length = 1000)
     private String answerContents;
 
