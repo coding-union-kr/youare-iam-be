@@ -5,7 +5,6 @@ import com.letter.exception.ErrorCode;
 import com.letter.member.entity.Couple;
 import com.letter.member.entity.Member;
 import com.letter.member.repository.CoupleCustomRepositoryImpl;
-import com.letter.member.repository.MemberRepository;
 import com.letter.question.dto.*;
 import com.letter.question.entity.Question;
 import com.letter.question.entity.SelectQuestion;
@@ -23,12 +22,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class QuestionService {
 
-    private final MemberRepository memberRepository;
     private final CoupleCustomRepositoryImpl coupleCustomRepository;
 
     private final QuestionRepository questionRepository;
     private final QuestionCustomRepositoryImpl questionCustomRepository;
     private final SelectQuestionRepository selectQuestionRepository;
+    private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
     private final AnswerCustomRepositoryImpl answerCustomRepository;
 
     public ResponseEntity<List<QuestionResponse.QuestionList>> getQuestionList(Member member) {
@@ -64,12 +63,18 @@ public class QuestionService {
 
             final Couple couple = optionalCouple.get();
 
+            // 1일 1질문
+            final Long countByAlreadyRegisterQuestion = selectQuestionCustomRepository.countByAlreadyRegisterQuestion(couple);
+            if (countByAlreadyRegisterQuestion == 1) {
+                throw new CustomException(ErrorCode.CAN_NOT_REGISTER_QUESTION_TODAY);
+            }
+
             final int countSelectQuestion = selectQuestionRepository.countByQuestionAndCouple(question, couple);
             if (countSelectQuestion == 1) {
                 throw new CustomException(ErrorCode.ALREADY_SELECTED_QUESTION);
             }
 
-            // 정상적인 플로우, 질문 프리셋에서 질문을 고른 경우
+            // 정상 플로우, 질문 프리셋에서 질문을 고른 경우
             selectedQuestion = saveQuestion(question, couple);
 
         } else {

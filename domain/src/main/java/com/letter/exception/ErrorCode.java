@@ -32,6 +32,7 @@ public enum ErrorCode {
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Q001", "프리셋에 존재하지 않는 질문입니다."),
     SELECT_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Q002", "선택 질문을 찾을 수 없습니다."),
     ALREADY_SELECTED_QUESTION(HttpStatus.CONFLICT, "Q003", "이미 선택했던 질문입니다."),
+    CAN_NOT_REGISTER_QUESTION_TODAY(HttpStatus.CONFLICT, "Q004", "오늘은 더 이상 질문을 등록할 수 없습니다."),
 
     /* Answer 관련 Error */
     ALREADY_ANSWER(HttpStatus.CONFLICT, "A001", "질문에 이미 답변을 작성했습니다.");
