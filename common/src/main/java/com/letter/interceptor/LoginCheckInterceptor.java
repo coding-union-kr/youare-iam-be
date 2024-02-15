@@ -7,6 +7,7 @@ import com.letter.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.naming.AuthenticationException;
 import java.util.Optional;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class LoginCheckInterceptor implements HandlerInterceptor {
@@ -24,6 +26,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
+
+        log.info("요청 IP:{}, Method:{}, URI:{}", request.getRemoteAddr(), request.getMethod(), request.getRequestURI());
 
         // HandlerMethod 을 상속받은 클래스가 아닌 경우 인터셉터 로직을 실행시키지 않도록 바로 true 를 반환하여 통과시켜 줌
         if(!(handler instanceof HandlerMethod)) return true;
