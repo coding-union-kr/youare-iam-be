@@ -50,3 +50,9 @@ oauth:
 encryption:
   secret_key: ${ENCRYPTION_SECRET_KEY}
   iv: ${ENCRYPTION_IV}
+
+origin:
+  frontend:
+    prod: ${FRONTEND_PROD_ORIGIN}
+  bambam: ${BAMBAM_ORIGIN}
+  biyamn: ${BIYAMN_ORIGIN}
