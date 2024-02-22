@@ -1,7 +1,5 @@
 server:
   port: 8080
-  tomcat:
-    connection-timeout: 60s
 
 spring:
   jpa:
@@ -54,5 +52,4 @@ encryption:
 origin:
   frontend:
     prod: ${FRONTEND_PROD_ORIGIN}
-  bambam: ${BAMBAM_ORIGIN}
-  biyamn: ${BIYAMN_ORIGIN}
+    local: ${FRONTEND_LOCAL_ORIGIN}

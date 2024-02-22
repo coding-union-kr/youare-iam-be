@@ -21,16 +21,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Value("${origin.frontend.prod}")
     private String frontendProdOrigin;
-    @Value("${origin.bambam}")
-    private String bambamOrigin;
-    @Value("${origin.biyamn}")
-    private String biyamnOrigin;
+
+    @Value("${origin.frontend.local}")
+    private String frontendLocalOrigin;
 
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
-        // TODO swagger는 모든 Origin에 열어놓기
         corsRegistry.addMapping("/**")
-                .allowedOrigins(frontendProdOrigin, bambamOrigin, biyamnOrigin)
+                .allowedOrigins(frontendProdOrigin, frontendLocalOrigin)
                 .allowedMethods("*")
 //                .allowedHeaders("Access-Control-Request-Headers") // 클라이언트에서 헤더에서 접근 가능하게 하기 위한 설정
                 .allowedHeaders("*")
