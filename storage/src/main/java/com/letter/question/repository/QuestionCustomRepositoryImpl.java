@@ -46,6 +46,7 @@ public class QuestionCustomRepositoryImpl implements QuestionCustomRepository {
                 .fetch();
     }
 
+    // TODO SelectQuestion에서 조회하는 메서드를 SelectQuestionCustomRepositoryImpl 클래스로 이동
     public List<LetterDetailResponse> findAllByCoupleAndNextCursor(Couple couple, int nextCursor) {
         if (nextCursor == 0) {
             return jpaQueryFactory

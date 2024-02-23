@@ -32,7 +32,6 @@ public class AnswerCustomRepositoryImpl implements AnswerCustomRepository {
                         answer.isShow.eq("Y"))
                 .orderBy(answer.selectQuestion.id.desc())
                 .fetch();
-
     }
 
 }

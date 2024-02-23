@@ -55,4 +55,8 @@ public class SelectQuestion {
     @OneToMany(mappedBy = "selectQuestion", fetch = FetchType.LAZY)
     private List<Answer> answer = new ArrayList<>();
 
+
+    public void updateIsShow() {
+        this.isShow = "N";
+    }
 }
