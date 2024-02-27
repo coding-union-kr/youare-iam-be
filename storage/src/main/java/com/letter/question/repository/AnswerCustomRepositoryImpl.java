@@ -3,6 +3,7 @@ package com.letter.question.repository;
 import static com.letter.question.entity.QAnswer.answer;
 
 import com.letter.member.entity.Couple;
+import com.letter.member.entity.Member;
 import com.letter.question.dto.DetailAnswerDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -32,6 +33,16 @@ public class AnswerCustomRepositoryImpl implements AnswerCustomRepository {
                         answer.isShow.eq("Y"))
                 .orderBy(answer.selectQuestion.id.desc())
                 .fetch();
+    }
+
+    public String findAnswerContentsBySelectQuestionId(Long selectQuestionId, Member member) {
+        return jpaQueryFactory
+                .select(answer.answerContents.as("answer"))
+                .from(answer)
+                .where(answer.selectQuestion.id.eq(selectQuestionId)
+                        .and(answer.member.eq(member))
+                        .and(answer.isShow.eq("Y")))
+                .fetchOne();
     }
 
 }

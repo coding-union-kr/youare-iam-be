@@ -35,7 +35,8 @@ public enum ErrorCode {
     CAN_NOT_REGISTER_QUESTION_TODAY(HttpStatus.CONFLICT, "Q004", "오늘은 더 이상 질문을 등록할 수 없습니다."),
 
     /* Answer 관련 Error */
-    ALREADY_ANSWER(HttpStatus.CONFLICT, "A001", "질문에 이미 답변을 작성했습니다.");
+    ALREADY_ANSWER(HttpStatus.CONFLICT, "A001", "질문에 이미 답변을 작성했습니다."),
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "A002", "답변을 찾을 수 없습니다.");
 
 
     private final HttpStatus status;

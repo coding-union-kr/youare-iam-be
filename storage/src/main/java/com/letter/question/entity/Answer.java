@@ -71,4 +71,8 @@ public class Answer {
         this.answerContents = answerContents;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateAnswerContents(String answerContents) {
+        this.answerContents = answerContents;
+    }
 }
