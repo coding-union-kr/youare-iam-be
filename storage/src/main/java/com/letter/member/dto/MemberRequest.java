@@ -7,12 +7,12 @@ import com.letter.question.entity.Answer;
 import com.letter.question.entity.Question;
 import com.letter.question.entity.SelectQuestion;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-// TODO 아우터 클래스인데 @Data를 붙여놓은 이유
-@Data
 public class MemberRequest {
 
     @Builder
@@ -23,8 +23,11 @@ public class MemberRequest {
     public static class CreateInviteLinkRequest{ // 초대 링크 생성 관련 request
 
         @Schema(description = "선택한 질문 ID")
+        @NotNull
         private Long questionId;
         @Schema(description = "선택한 질문에 대한 답의")
+        @NotNull
+        @Size(max = 1000)
         private String answer;
 
         public InviteOpponent toCreateInviteLink(String uuid, Question question, Member member) {
@@ -46,8 +49,12 @@ public class MemberRequest {
     public static class AcceptInviteLinkRequest{ // 초대 수락 관련 request
 
         @Schema(description = "받은 초대의 링크키")
+        @NotNull
+        @Size(max = 200)
         private String linkKey;
         @Schema(description = "초대 받은 질문에 대한 답변")
+        @NotNull
+        @Size(max = 1000)
         private String answer;
 
         public Couple toCoupleInfo() {
@@ -93,6 +100,8 @@ public class MemberRequest {
     @Data
     public static class InvitedPersonInfoRequest{ // 초대된 링크로 랜딩되는 페이지 관련 request
 
+        @NotNull
+        @Size(max = 200)
         private String linkKey;
 
     }

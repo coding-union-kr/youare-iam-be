@@ -15,15 +15,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Member", description = "사용자 관련 API")
 @RestController
 @RequestMapping("/api/v1/members")
+@Validated
 @RequiredArgsConstructor
 @Slf4j
 public class MemberController {
@@ -56,11 +58,10 @@ public class MemberController {
     })
     @LoginCheck
     @PostMapping("/invite/link")
-    // TODO RequestDTO에 검증 관련 어노테이션이 존재하지 않는데 @Valid를 사용한 이유
     public ResponseEntity<MemberResponse.CreateInviteLinkResponse> createInviteLink(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true)
+            @Validated
             @RequestBody
-            @Valid
             MemberRequest.CreateInviteLinkRequest request,
             @User
             Member member
@@ -100,11 +101,10 @@ public class MemberController {
     })
     @LoginCheck
     @PostMapping("/invite/accept")
-    // TODO RequestDTO에 검증 관련 어노테이션이 존재하지 않는데 @Valid를 사용한 이유
     public ResponseEntity<MemberResponse.AcceptInviteLinkResponse> acceptedInvite(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true)
+            @Validated
             @RequestBody
-            @Valid
             MemberRequest.AcceptInviteLinkRequest request,
             @User
             Member member
@@ -131,6 +131,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse.InvitedPersonInfoResponse> getInvitedPersonInfo(
             @Parameter(required = true, description = "받은 초대의 링크키")
             @PathVariable("linkKey")
+            @Size(max = 200)
             String linkKey
     ) {
         return ResponseEntity.ok().body(memberService.getInvitedPersonInfo(linkKey));

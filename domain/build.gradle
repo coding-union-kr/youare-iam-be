@@ -1,6 +1,5 @@
 dependencies {
     implementation project(':storage') // storage 모듈 의존성 추가
-    implementation 'com.coveo:spring-boot-parameter-store-integration:1.5.0'
 }
 
 tasks.named('bootJar'){ // bootJar 세팅을 켜기

@@ -7,7 +7,6 @@ import com.letter.member.entity.Member;
 import com.letter.member.repository.CoupleCustomRepositoryImpl;
 import com.letter.question.dto.AnswerContentsResponse;
 import com.letter.question.dto.AnswerRequest;
-import com.letter.question.dto.ModifyAnswerRequest;
 import com.letter.question.dto.QuestionContentsResponse;
 import com.letter.question.entity.Answer;
 import com.letter.question.entity.SelectQuestion;
@@ -97,7 +96,7 @@ public class AnswerService {
     }
 
     @Transactional
-    public void modifyAnswer(ModifyAnswerRequest modifyAnswerRequest, Member member) {
+    public void modifyAnswer(AnswerRequest answerRequest, Member member) {
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
         if (optionalCouple.isEmpty()) {
@@ -106,7 +105,7 @@ public class AnswerService {
 
         final Couple couple = optionalCouple.get();
 
-        final SelectQuestion selectQuestion = selectQuestionCustomRepository.findAnswerBySelectQuestion(modifyAnswerRequest.getSelectQuestionId(), couple).orElseThrow(
+        final SelectQuestion selectQuestion = selectQuestionCustomRepository.findAnswerBySelectQuestion(answerRequest.getSelectQuestionId(), couple).orElseThrow(
                 () -> new CustomException(ErrorCode.BAD_REQUEST)
         );
 
@@ -114,6 +113,6 @@ public class AnswerService {
                 () -> new CustomException(ErrorCode.BAD_REQUEST)
         );
 
-        answer.updateAnswerContents(modifyAnswerRequest.getAnswer());
+        answer.updateAnswerContents(answerRequest.getAnswer());
     }
 }
