@@ -5,21 +5,23 @@ import com.letter.annotation.User;
 import com.letter.member.entity.Member;
 import com.letter.question.dto.AnswerContentsResponse;
 import com.letter.question.dto.AnswerRequest;
-import com.letter.question.dto.ModifyAnswerRequest;
 import com.letter.question.dto.QuestionContentsResponse;
 import com.letter.question.service.AnswerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Answer Controller", description = "답변 관련 컨트롤러")
 @RestController
 @RequestMapping("/api/v1")
+@Validated
 @RequiredArgsConstructor
 public class AnswerController {
 
@@ -37,7 +39,8 @@ public class AnswerController {
     @LoginCheck
     @GetMapping("/answer/question")
     public ResponseEntity<QuestionContentsResponse> getAnswersQuestion(
-            @RequestParam(name = "selected-question-id") Long selectedQuestionId,
+            @RequestParam(name = "selected-question-id")
+            @Min(1) Long selectedQuestionId,
             @User Member member) {
         return answerService.getAnswersQuestion(selectedQuestionId, member);
     }
@@ -54,6 +57,7 @@ public class AnswerController {
     @LoginCheck
     @PostMapping("/answer")
     public ResponseEntity<?> registerAnswer(
+            @Validated
             @RequestBody AnswerRequest answerRequest,
             @User Member member) {
         return answerService.registerAnswer(answerRequest, member);
@@ -71,7 +75,8 @@ public class AnswerController {
     @LoginCheck
     @GetMapping("/answer")
     public ResponseEntity<AnswerContentsResponse> getAnswer(
-            @RequestParam(name = "selected-question-id") Long selectedQuestionId,
+            @RequestParam(name = "selected-question-id")
+            @Min(1) Long selectedQuestionId,
             @User Member member) {
         return ResponseEntity.ok(answerService.getAnswer(selectedQuestionId, member));
     }
@@ -88,9 +93,10 @@ public class AnswerController {
     @LoginCheck
     @PutMapping("/answer")
     public ResponseEntity<Void> modifyAnswer(
-            @RequestBody ModifyAnswerRequest modifyAnswerRequest,
+            @Validated
+            @RequestBody AnswerRequest answerRequest,
             @User Member member) {
-        answerService.modifyAnswer(modifyAnswerRequest, member);
+        answerService.modifyAnswer(answerRequest, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 }

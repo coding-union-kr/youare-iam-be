@@ -1,18 +1,16 @@
 package com.letter.question.dto;
 
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class QuestionRequest {
 
-    private QuestionRequest() {}
+    private Long questionId;
 
-    @Getter
-    @NoArgsConstructor
-    public static class SelectOrRegisterQuestion {
-        private Long questionId;
-
-        private String question;
-    }
+    @Size(max = 200)
+    private String question;
 
 }
