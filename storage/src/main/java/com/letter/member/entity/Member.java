@@ -38,7 +38,7 @@ public class Member {
     @Column(name = "KAKAO_ID", nullable = false)
     private Long kakaoId;
 
-    @Size(max = 100)
+    @Size(max = 500)
     @Column(name = "REFRESH_TOKEN", length = 100)
     private String refreshToken;
 
