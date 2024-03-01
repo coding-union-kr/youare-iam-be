@@ -42,7 +42,6 @@ public class SelectQuestion {
     private RegisterQuestion registerQuestion;
 
     @Size(max = 1)
-    @NotNull
     @ColumnDefault("Y")
     @Column(name = "IS_SHOW", length = 1)
     private String isShow;
