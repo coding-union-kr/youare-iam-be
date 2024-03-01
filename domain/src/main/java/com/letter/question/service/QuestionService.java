@@ -45,15 +45,15 @@ public class QuestionService {
     }
 
     public ResponseEntity<QuestionResponse.SelectedQuestion> selectOrRegisterQuestion(
-            QuestionRequest.SelectOrRegisterQuestion selectOrRegisterQuestion,
+            QuestionRequest questionRequest,
             Member member) {
         Long selectedQuestion = null;
 
         // 질문 프리셋에 있는 질문 등록
-        if (selectOrRegisterQuestion.getQuestionId() != null) {
+        if (questionRequest.getQuestionId() != null) {
 
             // 질문 프리셋에 없는 질문일 경우
-            final Question question = questionRepository.findQuestionById(selectOrRegisterQuestion.getQuestionId()).orElseThrow(
+            final Question question = questionRepository.findQuestionById(questionRequest.getQuestionId()).orElseThrow(
                     () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
             );
 
