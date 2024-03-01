@@ -43,9 +43,10 @@ public class InviteOpponent {
     @Column(name = "LINK_KEY", nullable = false, length = 200)
     private String linkKey;
 
+    @Size(max = 5000)
     @NotNull
     @Convert(converter = CryptoStringConverter.class)
-    @Column(name = "ANS", nullable = false, length = 1000)
+    @Column(name = "ANS", nullable = false, length = 5000)
     private String answer;
 
     @Size(max = 1)

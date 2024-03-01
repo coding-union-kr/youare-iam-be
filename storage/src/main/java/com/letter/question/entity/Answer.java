@@ -45,10 +45,10 @@ public class Answer {
     @JoinColumn(name = "SEL_QSTN_ID", nullable = false)
     private SelectQuestion selectQuestion;
 
-    @Size(max = 1000)
+    @Size(max = 5000)
     @NotNull
     @Convert(converter = CryptoStringConverter.class)
-    @Column(name = "ANS", nullable = false, length = 1000)
+    @Column(name = "ANS", nullable = false, length = 5000)
     private String answerContents;
 
     @Size(max = 1)
