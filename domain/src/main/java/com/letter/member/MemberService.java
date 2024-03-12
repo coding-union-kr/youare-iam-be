@@ -174,6 +174,7 @@ public class MemberService {
         // 답변 테이블에 정보 등록
         answerRepository.saveAll(answers);
 
+        // TODO 검사하지 않을 거라면 해당 메서드 반환값을 왜 Long으로 선언했는지, 만약 예외를 던지게 된다면 500 에러가 되어야 할 것 같음
         // 초대 상대 테이블에 노출 여부 'N' 으로 변경
         inviteOpponentCustomRepository.updateIsShow(inviteOpponent.getMember().getId());
 
