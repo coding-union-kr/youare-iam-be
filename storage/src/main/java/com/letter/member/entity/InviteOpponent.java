@@ -10,12 +10,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Getter
+@DynamicInsert
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -58,5 +60,12 @@ public class InviteOpponent {
     @NotNull
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
+
+    public InviteOpponent(Question question, Member member, String answer, String uuid) {
+        this.question = question;
+        this.member = member;
+        this.answer = answer;
+        this.linkKey = uuid;
+    }
 
 }
