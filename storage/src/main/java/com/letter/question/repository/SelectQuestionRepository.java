@@ -11,6 +11,6 @@ public interface SelectQuestionRepository extends JpaRepository<SelectQuestion, 
 
     int countByQuestionAndCouple(Question question, Couple couple);
 
-    Optional<SelectQuestion> findByIdAndCouple(Long id, Couple couple);
+    Optional<SelectQuestion> findByIdAndCoupleAndIsShow(Long id, Couple couple, String isShow);
 
 }

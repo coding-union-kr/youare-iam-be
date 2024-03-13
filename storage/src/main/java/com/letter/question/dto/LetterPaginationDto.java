@@ -15,7 +15,7 @@ public class LetterPaginationDto {
     private List<LetterDetailResponse> letters;
 
     @Schema(description = "다음 아이템의 ID")
-    private int nextCursor;
+    private long nextCursor;
 
     @Schema(description = "사용자의 ID")
     private String myId;

@@ -33,4 +33,9 @@ public class LetterDetailResponse {
     @Schema(description = "답변 리스트")
     private List<AnswerResponse> answer;
 
+    public LetterDetailResponse(Long selectQuestionId, String question, LocalDateTime createdAt) {
+        this.selectQuestionId = selectQuestionId;
+        this.question = question;
+        this.createdAt = createdAt;
+    }
 }

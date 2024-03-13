@@ -1,7 +1,9 @@
 package com.letter.question.repository;
 
 import com.letter.member.entity.Couple;
+import com.letter.question.dto.LetterDetailDto;
 import com.letter.question.dto.LockedSelectQuestionDto;
+import com.letter.question.dto.QuestionContentsResponse;
 import com.letter.question.entity.SelectQuestion;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -12,7 +14,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.letter.question.entity.QQuestion.question;
 import static com.letter.question.entity.QSelectQuestion.selectQuestion;
+import static com.letter.question.entity.QRegisterQuestion.registerQuestion;
 import static com.letter.question.entity.QAnswer.answer;
 
 @Repository
@@ -20,6 +24,8 @@ import static com.letter.question.entity.QAnswer.answer;
 public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
+
+    private static final String QUESTION = "question";
 
     public Long countByAlreadyRegisterQuestion(Couple couple) {
         return jpaQueryFactory
@@ -31,12 +37,79 @@ public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomR
                 .fetchFirst();
     }
 
+    public List<LetterDetailDto> findAllByCoupleAndNextCursor(Couple couple, int nextCursor) {
+        if (nextCursor == 0) {
+            return jpaQueryFactory
+                    .select(Projections.bean(LetterDetailDto.class,
+                            selectQuestion.id.as("selectQuestionId"),
+                            question.questionContents.as(QUESTION),
+                            registerQuestion.question.as("registerQuestion"),
+                            selectQuestion.createdAt))
+                    .from(selectQuestion)
+                    .leftJoin(question)
+                    .on(selectQuestion.question.eq(question)
+                            .and(question.isShow.eq("Y")))
+                    .leftJoin(registerQuestion)
+                    .on(selectQuestion.registerQuestion.eq(registerQuestion)
+                            .and(registerQuestion.isShow.eq("Y")))
+                    .where(selectQuestion.couple.eq(couple),
+                            selectQuestion.isShow.eq("Y"))
+                    .orderBy(selectQuestion.id.desc())
+                    .limit(26)
+                    .fetch();
+        } else {
+            return jpaQueryFactory
+                    .select(Projections.bean(LetterDetailDto.class,
+                            selectQuestion.id.as("selectQuestionId"),
+                            question.questionContents.as(QUESTION),
+                            registerQuestion.question.as("registerQuestion"),
+                            selectQuestion.createdAt))
+                    .from(selectQuestion)
+                    .leftJoin(question)
+                    .on(selectQuestion.question.id.eq(question.id)
+                            .and(question.isShow.eq("Y")))
+                    .leftJoin(registerQuestion)
+                    .on(selectQuestion.registerQuestion.eq(registerQuestion)
+                            .and(registerQuestion.isShow.eq("Y")))
+                    .where(selectQuestion.id.loe(nextCursor),
+                            selectQuestion.couple.eq(couple),
+                            selectQuestion.isShow.eq("Y"))
+                    .orderBy(selectQuestion.id.desc())
+                    .limit(26)
+                    .fetch();
+        }
+    }
+
+    public QuestionContentsResponse findQuestionContentsBySelectQuestionIdAndCouple(boolean hasQuestion, Long selectQuestionId) {
+        if (hasQuestion) {
+            return jpaQueryFactory
+                    .select(Projections.bean(QuestionContentsResponse.class,
+                            question.questionContents.as(QUESTION)))
+                    .from(question)
+                    .leftJoin(selectQuestion)
+                    .on(selectQuestion.id.eq(selectQuestionId)
+                            .and(selectQuestion.isShow.eq("Y")))
+                    .where(selectQuestion.question.eq(question)
+                            .and(question.isShow.eq("Y")))
+                    .fetchOne();
+        } else {
+            return jpaQueryFactory
+                    .select(Projections.bean(QuestionContentsResponse.class,
+                            registerQuestion.question))
+                    .from(registerQuestion)
+                    .leftJoin(selectQuestion)
+                    .on(selectQuestion.id.eq(selectQuestionId)
+                            .and(selectQuestion.isShow.eq("Y")))
+                    .where(selectQuestion.registerQuestion.eq(registerQuestion)
+                            .and(registerQuestion.isShow.eq("Y")))
+                    .fetchOne();
+        }
+    }
+
     public List<LockedSelectQuestionDto> findSelectQuestionByAnswerCount() {
-        // TODO 쿼리를 직접 작성해서 조회를 해본 결과 answer count는 없어도 원하는 결과를 조회할 수 있었음
         return jpaQueryFactory
                 .select(Projections.bean(LockedSelectQuestionDto.class,
-                        selectQuestion,
-                        answer.count().as("answerCount")))
+                        selectQuestion))
                 .from(selectQuestion)
                 .leftJoin(answer)
                 .on(answer.selectQuestion.eq(selectQuestion),

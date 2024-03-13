@@ -5,19 +5,23 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "YI_REGISTER_QUESTION", schema = "YI")
+@DynamicInsert
+@Getter
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class RegisterQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +35,7 @@ public class RegisterQuestion {
     @Size(max = 200)
     @NotNull
     @Column(name = "QSTN", nullable = false, length = 200)
-    private String quetion;
+    private String question;
 
     @Size(max = 1)
     @ColumnDefault("Y")
@@ -50,4 +54,9 @@ public class RegisterQuestion {
     @OneToMany(mappedBy = "registerQuestion", fetch = FetchType.LAZY)
     private List<SelectQuestion> selectQuestions = new ArrayList<>();
 
+
+    public RegisterQuestion(Member member, String question) {
+        this.member = member;
+        this.question = question;
+    }
 }
