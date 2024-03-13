@@ -7,6 +7,7 @@ import com.letter.member.entity.Member;
 import com.letter.member.repository.CoupleCustomRepositoryImpl;
 import com.letter.question.dto.*;
 import com.letter.question.entity.Question;
+import com.letter.question.entity.RegisterQuestion;
 import com.letter.question.entity.SelectQuestion;
 import com.letter.question.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
     private final QuestionCustomRepositoryImpl questionCustomRepository;
+    private final RegisterQuestionRepository registerQuestionRepository;
     private final SelectQuestionRepository selectQuestionRepository;
     private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
     private final AnswerCustomRepositoryImpl answerCustomRepository;
@@ -44,10 +46,24 @@ public class QuestionService {
         return ResponseEntity.ok(questionLists);
     }
 
+
     public ResponseEntity<QuestionResponse.SelectedQuestion> selectOrRegisterQuestion(
             QuestionRequest questionRequest,
             Member member) {
         Long selectedQuestion = null;
+
+        Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
+        if (optionalCouple.isEmpty()) {
+            throw new CustomException(ErrorCode.COUPLE_NOT_FOUND);
+        }
+
+        final Couple couple = optionalCouple.get();
+
+        // 1일 1질문
+        final Long countByAlreadyRegisterQuestion = selectQuestionCustomRepository.countByAlreadyRegisterQuestion(couple);
+        if (countByAlreadyRegisterQuestion == 1) {
+            throw new CustomException(ErrorCode.CAN_NOT_REGISTER_QUESTION_TODAY);
+        }
 
         // 질문 프리셋에 있는 질문 등록
         if (questionRequest.getQuestionId() != null) {
@@ -57,36 +73,29 @@ public class QuestionService {
                     () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
             );
 
-            Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
-            if (optionalCouple.isEmpty()) {
-                throw new CustomException(ErrorCode.COUPLE_NOT_FOUND);
-            }
-
-            final Couple couple = optionalCouple.get();
-
-            // 1일 1질문
-            final Long countByAlreadyRegisterQuestion = selectQuestionCustomRepository.countByAlreadyRegisterQuestion(couple);
-            if (countByAlreadyRegisterQuestion == 1) {
-                throw new CustomException(ErrorCode.CAN_NOT_REGISTER_QUESTION_TODAY);
-            }
-
             final int countSelectQuestion = selectQuestionRepository.countByQuestionAndCouple(question, couple);
             if (countSelectQuestion == 1) {
                 throw new CustomException(ErrorCode.ALREADY_SELECTED_QUESTION);
             }
 
             // 정상 플로우, 질문 프리셋에서 질문을 고른 경우
-            selectedQuestion = saveQuestion(question, couple);
+            selectedQuestion = saveSelectQuestion(question, couple);
 
+
+        // 커스텀 질문 등록
         } else {
-            // TODO 커스텀 질문 등록
-            log.info("커스텀 질문 등록");
+
+            final RegisterQuestion registerQuestion = new RegisterQuestion(member, questionRequest.getQuestion());
+            registerQuestionRepository.save(registerQuestion);
+
+            selectedQuestion = saveSelectQuestion(registerQuestion, couple);
+
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new QuestionResponse.SelectedQuestion(selectedQuestion));
     }
 
-    public Long saveQuestion(Question question, Couple couple) {
+    private Long saveSelectQuestion(Question question, Couple couple) {
 
         final SelectQuestion selectQuestion = SelectQuestion.builder()
                 .question(question)
@@ -96,6 +105,18 @@ public class QuestionService {
 
         return selectQuestion.getId();
     }
+
+    private Long saveSelectQuestion(RegisterQuestion registerQuestion, Couple couple) {
+
+        final SelectQuestion selectQuestion = SelectQuestion.builder()
+                .registerQuestion(registerQuestion)
+                .couple(couple)
+                .build();
+        selectQuestionRepository.save(selectQuestion);
+
+        return selectQuestion.getId();
+    }
+
 
     public ResponseEntity<LetterPaginationDto> getLetterList(int nextCursor, Member member) {
 
@@ -108,22 +129,35 @@ public class QuestionService {
 
         final LetterPaginationDto letterPaginationDto = new LetterPaginationDto();
 
-        final List<LetterDetailResponse> letterDetailResponses = questionCustomRepository.findAllByCoupleAndNextCursor(couple, nextCursor);
+        final List<LetterDetailDto> letterDetailDtoList = selectQuestionCustomRepository.findAllByCoupleAndNextCursor(couple, nextCursor);
 
-        if (letterDetailResponses.isEmpty()) {
+        if (letterDetailDtoList.isEmpty()) {
             return ResponseEntity.ok(null);
         }
 
         letterPaginationDto.setMyId(member.getId());
 
-        if (letterDetailResponses.size() == 26) {
-            final LetterDetailResponse nextLetter = letterDetailResponses.get(letterDetailResponses.size() - 1);
-            letterPaginationDto.setNextCursor(Math.toIntExact(nextLetter.getSelectQuestionId()));
-            letterDetailResponses.remove(letterDetailResponses.size() - 1);
+        if (letterDetailDtoList.size() == 26) {
+            final LetterDetailDto nextLetter = letterDetailDtoList.get(letterDetailDtoList.size() - 1);
+            letterPaginationDto.setNextCursor(nextLetter.getSelectQuestionId());
+            letterDetailDtoList.remove(letterDetailDtoList.size() - 1);
         }
 
-        final List<DetailAnswerDto> databaseDetailAnswerDtoList = answerCustomRepository.findAllBySelectQuestionIdAndCouple(letterDetailResponses.get(0).getSelectQuestionId(), couple);
-        Collections.reverse(letterDetailResponses);
+        final List<DetailAnswerDto> databaseDetailAnswerDtoList = answerCustomRepository.findAllBySelectQuestionIdAndCouple(letterDetailDtoList.get(0).getSelectQuestionId(), couple);
+        Collections.reverse(letterDetailDtoList);
+
+        // LetterDetailResponse로 옮기기
+        final List<LetterDetailResponse> letterDetailResponses = new ArrayList<>();
+        for (LetterDetailDto letterDetailDto : letterDetailDtoList) {
+            String question;
+            if (letterDetailDto.getQuestion() != null) {
+                question = letterDetailDto.getQuestion();
+            } else {
+                question = letterDetailDto.getRegisterQuestion();
+            }
+
+            letterDetailResponses.add(new LetterDetailResponse(letterDetailDto.getSelectQuestionId(), question, letterDetailDto.getCreatedAt()));
+        }
 
         final HashMap<Long, List<DetailAnswerDto>> letterDetailHashmap = new HashMap<>();
 
