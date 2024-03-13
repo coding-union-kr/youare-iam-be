@@ -52,7 +52,7 @@ public class SelectQuestion {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "selectQuestion", fetch = FetchType.LAZY)
-    private List<Answer> answer = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
 
 
     public void updateIsShow() {

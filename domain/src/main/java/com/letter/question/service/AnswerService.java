@@ -29,7 +29,6 @@ public class AnswerService {
     private final AnswerCustomRepositoryImpl answerCustomRepository;
     private final SelectQuestionRepository selectQuestionRepository;
     private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
-    private final QuestionCustomRepositoryImpl questionCustomRepository;
 
     public ResponseEntity<QuestionContentsResponse> getAnswersQuestion(Long selectedQuestionId, Member member) {
 
@@ -40,11 +39,13 @@ public class AnswerService {
 
         final Couple couple = optionalCouple.get();
 
-        final QuestionContentsResponse questionContentsResponse = questionCustomRepository.findQuestionContentsBySelectQuestionIdAndCouple(selectedQuestionId, couple);
+        final SelectQuestion selectQuestion = selectQuestionRepository.findByIdAndCoupleAndIsShow(selectedQuestionId, couple, "Y").orElseThrow(
+                () -> new CustomException(ErrorCode.SELECT_QUESTION_NOT_FOUND)
+        );
 
-        if (questionContentsResponse == null) {
-            throw new CustomException(ErrorCode.SELECT_QUESTION_NOT_FOUND);
-        }
+        boolean hasQuestion = selectQuestion.getQuestion() != null;
+
+        final QuestionContentsResponse questionContentsResponse = selectQuestionCustomRepository.findQuestionContentsBySelectQuestionIdAndCouple(hasQuestion, selectedQuestionId);
 
         return ResponseEntity.ok(questionContentsResponse);
     }
@@ -58,7 +59,7 @@ public class AnswerService {
 
         final Couple couple = optionalCouple.get();
 
-        final SelectQuestion selectQuestion = selectQuestionRepository.findByIdAndCouple(answerRequest.getSelectQuestionId(), couple).orElseThrow(
+        final SelectQuestion selectQuestion = selectQuestionRepository.findByIdAndCoupleAndIsShow(answerRequest.getSelectQuestionId(), couple, "Y").orElseThrow(
                 () -> new CustomException(ErrorCode.SELECT_QUESTION_NOT_FOUND)
         );
 

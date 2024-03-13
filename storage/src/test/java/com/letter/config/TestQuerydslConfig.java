@@ -3,11 +3,13 @@ package com.letter.config;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@Configuration
-public class QueryDslConfig {
+@EnableJpaAuditing
+@TestConfiguration
+public class TestQuerydslConfig {
 
     @PersistenceContext
     private EntityManager entityManager;
