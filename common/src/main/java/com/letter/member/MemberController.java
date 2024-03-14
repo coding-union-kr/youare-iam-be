@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -66,8 +67,7 @@ public class MemberController {
             @User
             Member member
     ) {
-        // TODO 데이터 생성이기 때문에 POST 메서드 API로 설계. 응답 상태 코드가 201이 되어야 하는게 아닌지
-        return ResponseEntity.ok().body(memberService.createInviteLink(request, member));
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.createInviteLink(request, member));
     }
 
 
@@ -109,8 +109,7 @@ public class MemberController {
             @User
             Member member
     ) {
-        // TODO 데이터 생성이기 때문에 POST 메서드 API로 설계. 응답 상태 코드가 201이 되어야 하는게 아닌지
-        return ResponseEntity.ok().body(memberService.acceptedInvite(request, member));
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.acceptedInvite(request, member));
     }
 
 
