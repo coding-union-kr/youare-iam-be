@@ -50,7 +50,7 @@ public class AnswerService {
         return ResponseEntity.ok(questionContentsResponse);
     }
 
-    public ResponseEntity<?> registerAnswer(AnswerRequest answerRequest, Member member) {
+    public ResponseEntity<Void> registerAnswer(AnswerRequest answerRequest, Member member) {
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
         if (optionalCouple.isEmpty()) {

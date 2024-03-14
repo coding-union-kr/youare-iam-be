@@ -56,7 +56,7 @@ public class AnswerController {
     )
     @LoginCheck
     @PostMapping("/answer")
-    public ResponseEntity<?> registerAnswer(
+    public ResponseEntity<Void> registerAnswer(
             @Validated
             @RequestBody AnswerRequest answerRequest,
             @User Member member) {
