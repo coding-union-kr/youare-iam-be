@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +49,7 @@ public class OAuthService {
      * @return
      */
     @Transactional
-    public ResponseEntity<String> getOAuthInfo(String code){
+    public HttpHeaders getOAuthInfo(String code){
 
         // dto에 담은 사용자 정보 가져오기
         OAuthResponse userInfo = getKakaoUserInfo(code);
@@ -92,7 +90,7 @@ public class OAuthService {
         //헤더에 토큰 담아주기
         HttpHeaders headers = new HttpHeaders();
         headers.add(JwtProvider.HEADER_STRING, JwtProvider.TOKEN_PREFIX + accessToken);
-        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(accessToken);
+        return headers;
     }
 
 
@@ -240,7 +238,7 @@ public class OAuthService {
     }
 
 
-    public ResponseEntity<Void> issuedAccessTokenByRefreshToken(HttpServletRequest httpServletRequest) {
+    public HttpHeaders issuedAccessTokenByRefreshToken(HttpServletRequest httpServletRequest) {
 
         final String expiredAccessToken = jwtProvider.bringToken(httpServletRequest);
         final String memberId = jwtProvider.expiredTokenCombo(expiredAccessToken);
@@ -254,7 +252,7 @@ public class OAuthService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(JwtProvider.HEADER_STRING, JwtProvider.TOKEN_PREFIX + accessToken);
-        return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(null);
+        return headers;
     }
 
 

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class QuestionController {
     @LoginCheck
     @GetMapping("/questions")
     public ResponseEntity<List<QuestionResponse.QuestionList>> getQuestionList(@User Member member) {
-        return questionService.getQuestionList(member);
+        return ResponseEntity.ok(questionService.getQuestionList(member));
     }
 
     @Operation(summary = "질문 선택 or 등록", description = "Request body로 질문의 id(프리셋)를 받아서 등록하는 API")
@@ -48,7 +49,7 @@ public class QuestionController {
             @Validated
             @RequestBody QuestionRequest questionRequest,
             @User Member member) {
-        return questionService.selectOrRegisterQuestion(questionRequest, member);
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionService.selectOrRegisterQuestion(questionRequest, member));
     }
 
     @Operation(summary = "대화 상세 페이지 조회", description = "주고 받은 질문과 답변 조회 API")
@@ -57,19 +58,19 @@ public class QuestionController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "조회 성공",
-                            content = @Content(schema = @Schema(implementation = LetterPaginationDto.class))
+                            content = @Content(schema = @Schema(implementation = LetterPaginationResponse.class))
                     )
             }
     )
     @LoginCheck
     @GetMapping("/letters")
-    public ResponseEntity<LetterPaginationDto> getLetterList(
+    public ResponseEntity<LetterPaginationResponse> getLetterList(
             @RequestParam(
                     name = "next-cursor",
                     required = false,
                     defaultValue = "0"
             ) int nextCursor,
             @User Member member) {
-        return questionService.getLetterList(nextCursor, member);
+        return ResponseEntity.ok(questionService.getLetterList(nextCursor, member));
     }
 }
