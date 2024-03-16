@@ -12,8 +12,6 @@ import com.letter.question.entity.SelectQuestion;
 import com.letter.question.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,7 @@ public class QuestionService {
     private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
     private final AnswerCustomRepositoryImpl answerCustomRepository;
 
-    public ResponseEntity<List<QuestionResponse.QuestionList>> getQuestionList(Member member) {
+    public List<QuestionResponse.QuestionList> getQuestionList(Member member) {
         final List<QuestionResponse.QuestionList> questionLists;
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
@@ -43,11 +41,11 @@ public class QuestionService {
             questionLists = questionCustomRepository.findAllByCouple(optionalCouple.get());
         }
 
-        return ResponseEntity.ok(questionLists);
+        return questionLists;
     }
 
 
-    public ResponseEntity<QuestionResponse.SelectedQuestion> selectOrRegisterQuestion(
+    public QuestionResponse.SelectedQuestion selectOrRegisterQuestion(
             QuestionRequest questionRequest,
             Member member) {
         Long selectedQuestion = null;
@@ -92,7 +90,7 @@ public class QuestionService {
 
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new QuestionResponse.SelectedQuestion(selectedQuestion));
+        return new QuestionResponse.SelectedQuestion(selectedQuestion);
     }
 
     private Long saveSelectQuestion(Question question, Couple couple) {
@@ -118,7 +116,7 @@ public class QuestionService {
     }
 
 
-    public ResponseEntity<LetterPaginationDto> getLetterList(int nextCursor, Member member) {
+    public LetterPaginationResponse getLetterList(int nextCursor, Member member) {
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
         if (optionalCouple.isEmpty()) {
@@ -127,19 +125,19 @@ public class QuestionService {
 
         final Couple couple = optionalCouple.get();
 
-        final LetterPaginationDto letterPaginationDto = new LetterPaginationDto();
+        final LetterPaginationResponse letterPaginationResponse = new LetterPaginationResponse();
 
         final List<LetterDetailDto> letterDetailDtoList = selectQuestionCustomRepository.findAllByCoupleAndNextCursor(couple, nextCursor);
 
         if (letterDetailDtoList.isEmpty()) {
-            return ResponseEntity.ok(null);
+            return null;
         }
 
-        letterPaginationDto.setMyId(member.getId());
+        letterPaginationResponse.setMyId(member.getId());
 
         if (letterDetailDtoList.size() == 26) {
             final LetterDetailDto nextLetter = letterDetailDtoList.get(letterDetailDtoList.size() - 1);
-            letterPaginationDto.setNextCursor(nextLetter.getSelectQuestionId());
+            letterPaginationResponse.setNextCursor(nextLetter.getSelectQuestionId());
             letterDetailDtoList.remove(letterDetailDtoList.size() - 1);
         }
 
@@ -164,8 +162,8 @@ public class QuestionService {
         categorizeAnswer(databaseDetailAnswerDtoList, letterDetailHashmap);
         getAnswerList(letterDetailResponses, letterDetailHashmap, member);
 
-        letterPaginationDto.setLetters(letterDetailResponses);
-        return ResponseEntity.ok(letterPaginationDto);
+        letterPaginationResponse.setLetters(letterDetailResponses);
+        return letterPaginationResponse;
     }
 
     private void categorizeAnswer(

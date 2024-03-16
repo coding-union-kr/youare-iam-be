@@ -42,7 +42,7 @@ public class AnswerController {
             @RequestParam(name = "selected-question-id")
             @Min(1) Long selectedQuestionId,
             @User Member member) {
-        return answerService.getAnswersQuestion(selectedQuestionId, member);
+        return ResponseEntity.ok(answerService.getAnswersQuestion(selectedQuestionId, member));
     }
 
     @Operation(summary = "답변 등록", description = "Request body로 선택 질문 id와 그 질문의 답변을 받아 등록하는 API")
@@ -56,11 +56,12 @@ public class AnswerController {
     )
     @LoginCheck
     @PostMapping("/answer")
-    public ResponseEntity<?> registerAnswer(
+    public ResponseEntity<Void> registerAnswer(
             @Validated
             @RequestBody AnswerRequest answerRequest,
             @User Member member) {
-        return answerService.registerAnswer(answerRequest, member);
+        answerService.registerAnswer(answerRequest, member);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     @Operation(summary = "답변 조회", description = "")

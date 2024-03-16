@@ -12,8 +12,6 @@ import com.letter.question.entity.Answer;
 import com.letter.question.entity.SelectQuestion;
 import com.letter.question.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +28,7 @@ public class AnswerService {
     private final SelectQuestionRepository selectQuestionRepository;
     private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
 
-    public ResponseEntity<QuestionContentsResponse> getAnswersQuestion(Long selectedQuestionId, Member member) {
+    public QuestionContentsResponse getAnswersQuestion(Long selectedQuestionId, Member member) {
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
         if (optionalCouple.isEmpty()) {
@@ -43,14 +41,13 @@ public class AnswerService {
                 () -> new CustomException(ErrorCode.SELECT_QUESTION_NOT_FOUND)
         );
 
+        // TODO 좀 더 좋은 방법 생각해보기
         boolean hasQuestion = selectQuestion.getQuestion() != null;
 
-        final QuestionContentsResponse questionContentsResponse = selectQuestionCustomRepository.findQuestionContentsBySelectQuestionIdAndCouple(hasQuestion, selectedQuestionId);
-
-        return ResponseEntity.ok(questionContentsResponse);
+        return selectQuestionCustomRepository.findQuestionContentsBySelectQuestionIdAndCouple(hasQuestion, selectedQuestionId);
     }
 
-    public ResponseEntity<?> registerAnswer(AnswerRequest answerRequest, Member member) {
+    public void registerAnswer(AnswerRequest answerRequest, Member member) {
 
         Optional<Couple> optionalCouple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId());
         if (optionalCouple.isEmpty()) {
@@ -70,8 +67,6 @@ public class AnswerService {
         }
 
         answerRepository.save(new Answer(couple, member, selectQuestion, answerRequest.getAnswer()));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     public AnswerContentsResponse getAnswer(Long selectedQuestionId, Member member) {
