@@ -7,7 +7,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.letter.exception.CustomException;
 import com.letter.exception.ErrorCode;
-import io.jsonwebtoken.*;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,20 +82,20 @@ public class JwtProvider {
     public void validateToken(String token, String type) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SignatureException | SecurityException | MalformedJwtException e) {
             log.error("유효하지 않는 JWT 서명 입니다.");
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
 
             if (type.equals(ACCESS_TYPE)) {
                 final ErrorCode expiredAccessToken = ErrorCode.EXPIRED_ACCESS_TOKEN;
-                log.error("error message: {}", expiredAccessToken.getMessage());
+                log.error(expiredAccessToken.getMessage());
                 throw new CustomException(expiredAccessToken);
             }
 
             if (type.equals(REFRESH_TYPE)) {
                 final ErrorCode expiredRefreshToken = ErrorCode.EXPIRED_REFRESH_TOKEN;
-                log.error("error message: {}", expiredRefreshToken.getMessage());
+                log.error(expiredRefreshToken.getMessage());
                 throw new CustomException(expiredRefreshToken);
             }
 
