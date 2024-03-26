@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface InviteOpponentRepository extends JpaRepository<InviteOpponent,Long> {
 
-    Optional<InviteOpponent> findQuestionByLinkKey(String linkKey);
+    Optional<InviteOpponent> findQuestionByLinkKeyAndIsShow(String linkKey, String isShow);
 }

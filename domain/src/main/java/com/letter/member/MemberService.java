@@ -63,7 +63,7 @@ public class MemberService {
         String uuid = UUID.randomUUID().toString();
 
         // 질문 아이디 조회
-        Question question = questionRepository.findQuestionById(request.getQuestionId()).orElseThrow(
+        Question question = questionRepository.findQuestionByIdAndIsShow(request.getQuestionId(), "Y").orElseThrow(
                 () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
         );
 
@@ -93,7 +93,7 @@ public class MemberService {
     public MemberResponse.AcceptInviteLinkResponse acceptedInvite(MemberRequest.AcceptInviteLinkRequest request, Member member) {
 
         // 링크 고유 값으로 상대 초대 테이블에 해당 회원 조회
-        InviteOpponent inviteOpponent = inviteOpponentRepository.findQuestionByLinkKey(request.getLinkKey()).orElseThrow(
+        InviteOpponent inviteOpponent = inviteOpponentRepository.findQuestionByLinkKeyAndIsShow(request.getLinkKey(), "Y").orElseThrow(
                 () -> new CustomException(ErrorCode.BAD_REQUEST)
         );
 
@@ -194,7 +194,7 @@ public class MemberService {
     public MemberResponse.InvitedPersonInfoResponse getInvitedPersonInfo(String linkKey) {
 
         // 상대 테이블에서 링크 고유 값으로 회원 조회
-        InviteOpponent inviteOpponent = inviteOpponentRepository.findQuestionByLinkKey(linkKey).orElseThrow(
+        InviteOpponent inviteOpponent = inviteOpponentRepository.findQuestionByLinkKeyAndIsShow(linkKey, "Y").orElseThrow(
                 () -> new CustomException(ErrorCode.BAD_REQUEST)
         );
 

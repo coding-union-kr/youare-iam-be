@@ -24,12 +24,14 @@ public class InviteOpponentCustomRepositoryImpl implements InviteOpponentCustomR
         return jpaQueryFactory
                 .select(question.questionContents)
                 .from(inviteOpponent)
-                .leftJoin(question).on(inviteOpponent.question.id.eq(question.id))
-                .where(inviteOpponent.linkKey.eq(linkKey))
+                .leftJoin(question)
+                .on(inviteOpponent.question.id.eq(question.id))
+                .where(inviteOpponent.linkKey.eq(linkKey)
+                        .and(inviteOpponent.isShow.eq("Y")))
                 .fetchOne();
     }
 
-    public Long updateIsShow(String memberId){
+    public Long updateIsShow(String memberId) {
         Long updateIsShow = jpaQueryFactory
                 .update(inviteOpponent)
                 .set(inviteOpponent.isShow, "N")
@@ -44,10 +46,11 @@ public class InviteOpponentCustomRepositoryImpl implements InviteOpponentCustomR
 
     /**
      * 상대 초대 테이블에 노출 여부가 "N" 존재여부 확인
+     *
      * @param memberId
      * @return
      */
-    public Boolean existByMemberIdAndIsShow(String memberId){
+    public Boolean existByMemberIdAndIsShow(String memberId) {
         return jpaQueryFactory
                 .selectFrom(inviteOpponent)
                 .where(inviteOpponent.member.id.eq(memberId)
@@ -57,28 +60,30 @@ public class InviteOpponentCustomRepositoryImpl implements InviteOpponentCustomR
 
     /**
      * 회원 아이디와 등록일자로 데이터가 있는지 확인
+     *
      * @param memberId
      * @return
      */
-    public InviteOpponent existByMemberIdAndCreatedAt(String memberId){
+    public InviteOpponent existByMemberIdAndCreatedAt(String memberId) {
 
         LocalDateTime minutesAgo = LocalDateTime.now().minusDays(1);
 
         return jpaQueryFactory
-                        .select(inviteOpponent)
-                        .from(inviteOpponent)
-                        .where(inviteOpponent.member.id.eq(memberId)
-                                .and(inviteOpponent.createdAt.after(minutesAgo)))
-                        .orderBy(inviteOpponent.createdAt.desc())
-                        .fetchFirst();
+                .select(inviteOpponent)
+                .from(inviteOpponent)
+                .where(inviteOpponent.member.id.eq(memberId)
+                        .and(inviteOpponent.createdAt.after(minutesAgo)))
+                .orderBy(inviteOpponent.createdAt.desc())
+                .fetchFirst();
     }
 
     /**
      * 링크 키와 등록일자로 해당 데이터가 있는지 확인
+     *
      * @param linkKey
      * @return
      */
-    public InviteOpponent existByLinkKeyAndCreatedAt(String linkKey){
+    public InviteOpponent existByLinkKeyAndCreatedAt(String linkKey) {
 
         LocalDateTime minutesAgo = LocalDateTime.now().minusDays(1);
 
