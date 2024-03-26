@@ -50,7 +50,7 @@ class InviteOpponentRepositoryTest {
     @DisplayName("save() 후 DB 조회 테스트")
     void testSaveLinkKey() {
         // given
-        final Question question = questionRepository.findQuestionById(1L).orElseThrow();
+        final Question question = questionRepository.findQuestionByIdAndIsShow(1L, "Y").orElseThrow();
 
         final Member member = new Member();
         member.saveUserInfo(OAuthResponse.builder()

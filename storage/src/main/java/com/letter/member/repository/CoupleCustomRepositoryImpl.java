@@ -1,14 +1,14 @@
 package com.letter.member.repository;
 
 import com.letter.member.entity.Couple;
-import static com.letter.member.entity.QCouple.couple;
-
-import static com.letter.member.entity.QMember.member;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+
+import static com.letter.member.entity.QCouple.couple;
+import static com.letter.member.entity.QMember.member;
 
 @Repository
 @RequiredArgsConstructor

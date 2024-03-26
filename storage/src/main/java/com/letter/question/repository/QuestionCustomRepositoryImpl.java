@@ -1,8 +1,6 @@
 package com.letter.question.repository;
 
 import com.letter.member.entity.Couple;
-import com.letter.question.dto.LetterDetailResponse;
-import com.letter.question.dto.QuestionContentsResponse;
 import com.letter.question.dto.QuestionResponse;
 
 import static com.letter.question.entity.QQuestion.question;
@@ -29,6 +27,7 @@ public class QuestionCustomRepositoryImpl implements QuestionCustomRepository {
                         question.id.as("questionId"),
                         question.questionContents.as(QUESTION)))
                 .from(question)
+                .where(question.isShow.eq("Y"))
                 .fetch();
     }
 
