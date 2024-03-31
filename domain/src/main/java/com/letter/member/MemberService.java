@@ -2,6 +2,7 @@ package com.letter.member;
 
 import com.letter.exception.CustomException;
 import com.letter.exception.ErrorCode;
+import com.letter.member.dto.MemberCurrentSituationResponse;
 import com.letter.member.dto.MemberRequest;
 import com.letter.member.dto.MemberResponse;
 import com.letter.member.dto.MemberStatusResponse;
@@ -10,17 +11,22 @@ import com.letter.member.entity.Couple;
 import com.letter.member.entity.InviteOpponent;
 import com.letter.member.entity.Member;
 import com.letter.member.repository.*;
+import com.letter.question.dto.LetterDetailDto;
+import com.letter.question.dto.WaitingAnswerSelectQuestionDto;
 import com.letter.question.entity.Answer;
 import com.letter.question.entity.Question;
 import com.letter.question.entity.SelectQuestion;
 import com.letter.question.repository.AnswerRepository;
 import com.letter.question.repository.QuestionRepository;
+import com.letter.question.repository.SelectQuestionCustomRepositoryImpl;
 import com.letter.question.repository.SelectQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -34,7 +40,9 @@ public class MemberService {
     private final AnswerRepository answerRepository;
     private final SelectQuestionRepository selectQuestionRepository;
 
+    private final CoupleCustomRepositoryImpl coupleCustomRepository;
     private final InviteOpponentCustomRepositoryImpl inviteOpponentCustomRepository;
+    private final SelectQuestionCustomRepositoryImpl selectQuestionCustomRepository;
 
 
     /**
@@ -225,6 +233,36 @@ public class MemberService {
         }
 
         return new MemberStatusResponse(userStatus, linkKey);
+    }
+
+
+    public MemberCurrentSituationResponse getCurrentSituation(Member member) {
+        final Couple couple = coupleCustomRepository.findCoupleInMemberByMemberId(member.getId()).orElseThrow(
+                () -> new CustomException(ErrorCode.COUPLE_NOT_FOUND)
+        );
+
+        // 공개된 닫힌 질문 조회
+        final List<LetterDetailDto> letterDetailDtoList = selectQuestionCustomRepository.findLockedSelectQuestionByCouple(couple);
+        List<WaitingAnswerSelectQuestionDto> waitingAnswerList = new ArrayList<>();
+        for (LetterDetailDto letterDetailDto : letterDetailDtoList) {
+            String question = letterDetailDto.getQuestion();
+            if (question == null) {
+                question = letterDetailDto.getRegisterQuestion();
+            }
+            waitingAnswerList.add(new WaitingAnswerSelectQuestionDto(
+                    letterDetailDto.getSelectQuestionId(),
+                    question,
+                    letterDetailDto.getCreatedAt()));
+        }
+
+        // 커플 유지 날짜 조회
+        final LocalDateTime startedDateByCoupleId = coupleCustomRepository.findStartedDateByCoupleId(couple.getId());
+        long periodOfUse = ChronoUnit.DAYS.between(startedDateByCoupleId.toLocalDate(), LocalDateTime.now().toLocalDate()) + 1L;
+
+        // 커플이 모두 답변을 등록한 질문 조회
+        final Long countOpenSelectQuestion = selectQuestionCustomRepository.countOpenSelectQuestionByCouple(couple);
+
+        return new MemberCurrentSituationResponse(member.getId(), waitingAnswerList, periodOfUse, countOpenSelectQuestion);
     }
 
 }
