@@ -3,6 +3,7 @@ package com.letter.member;
 import com.letter.annotation.LoginCheck;
 import com.letter.annotation.User;
 import com.letter.exception.ExceptionResponse;
+import com.letter.member.dto.MemberCurrentSituationResponse;
 import com.letter.member.dto.MemberRequest;
 import com.letter.member.dto.MemberResponse;
 import com.letter.member.dto.MemberStatusResponse;
@@ -149,6 +150,13 @@ public class MemberController {
     @GetMapping("/user-status")
     public ResponseEntity<MemberStatusResponse> getUserStatus(@User Member member) {
         return ResponseEntity.ok(memberService.getUserStatus(member));
+    }
+
+
+    @LoginCheck
+    @GetMapping("/current-situation")
+    public ResponseEntity<MemberCurrentSituationResponse> getCurrentSituation(@User Member member) {
+        return ResponseEntity.ok(memberService.getCurrentSituation(member));
     }
 
 }

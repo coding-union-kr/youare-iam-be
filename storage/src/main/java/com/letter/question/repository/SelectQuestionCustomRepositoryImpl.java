@@ -26,6 +26,8 @@ public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomR
     private final JPAQueryFactory jpaQueryFactory;
 
     private static final String QUESTION = "question";
+    private static final String SELECT_QUESTION = "selectQuestionId";
+    private static final String REGISTER_QUESTION = "registerQuestion";
 
     public Long countByAlreadyRegisterQuestion(Couple couple) {
         return jpaQueryFactory
@@ -41,9 +43,9 @@ public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomR
         if (nextCursor == 0) {
             return jpaQueryFactory
                     .select(Projections.bean(LetterDetailDto.class,
-                            selectQuestion.id.as("selectQuestionId"),
+                            selectQuestion.id.as(SELECT_QUESTION),
                             question.questionContents.as(QUESTION),
-                            registerQuestion.question.as("registerQuestion"),
+                            registerQuestion.question.as(REGISTER_QUESTION),
                             selectQuestion.createdAt))
                     .from(selectQuestion)
                     .leftJoin(question)
@@ -60,9 +62,9 @@ public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomR
         } else {
             return jpaQueryFactory
                     .select(Projections.bean(LetterDetailDto.class,
-                            selectQuestion.id.as("selectQuestionId"),
+                            selectQuestion.id.as(SELECT_QUESTION),
                             question.questionContents.as(QUESTION),
-                            registerQuestion.question.as("registerQuestion"),
+                            registerQuestion.question.as(REGISTER_QUESTION),
                             selectQuestion.createdAt))
                     .from(selectQuestion)
                     .leftJoin(question)
@@ -145,5 +147,45 @@ public class SelectQuestionCustomRepositoryImpl implements SelectQuestionCustomR
                 .groupBy(selectQuestion.id)
                 .having(answer.selectQuestion.id.count().lt(2))
                 .fetchOne());
+    }
+
+    public List<LetterDetailDto> findLockedSelectQuestionByCouple(Couple couple) {
+        return jpaQueryFactory
+                .select(Projections.bean(LetterDetailDto.class,
+                        selectQuestion.id.as(SELECT_QUESTION),
+                        question.questionContents.as(QUESTION),
+                        registerQuestion.question.as(REGISTER_QUESTION),
+                        selectQuestion.createdAt))
+                .from(selectQuestion)
+                .leftJoin(answer)
+                .on(answer.couple.eq(couple)
+                        .and(answer.selectQuestion.eq(selectQuestion))
+                        .and(answer.isShow.eq("Y")))
+                .leftJoin(question)
+                .on(selectQuestion.question.id.eq(question.id)
+                        .and(question.isShow.eq("Y")))
+                .leftJoin(registerQuestion)
+                .on(selectQuestion.registerQuestion.eq(registerQuestion)
+                        .and(registerQuestion.isShow.eq("Y")))
+                .where(selectQuestion.couple.eq(couple)
+                        .and(selectQuestion.isShow.eq("Y")))
+                .groupBy(selectQuestion.id)
+                .having(answer.selectQuestion.id.count().lt(2))
+                .fetch();
+    }
+
+    public Long countOpenSelectQuestionByCouple(Couple couple) {
+        return jpaQueryFactory
+                .select(selectQuestion.countDistinct())
+                .from(selectQuestion)
+                .leftJoin(answer)
+                .on(answer.couple.eq(couple)
+                        .and(answer.selectQuestion.eq(selectQuestion))
+                        .and(answer.isShow.eq("Y")))
+                .where(selectQuestion.couple.eq(couple)
+                        .and(selectQuestion.isShow.eq("Y")))
+                .groupBy(selectQuestion.id)
+                .having(answer.selectQuestion.id.count().eq(2L))
+                .fetchOne();
     }
 }

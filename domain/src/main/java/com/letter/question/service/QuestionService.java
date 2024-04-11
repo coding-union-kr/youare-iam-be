@@ -67,7 +67,7 @@ public class QuestionService {
         if (questionRequest.getQuestionId() != null) {
 
             // 질문 프리셋에 없는 질문일 경우
-            final Question question = questionRepository.findQuestionById(questionRequest.getQuestionId()).orElseThrow(
+            final Question question = questionRepository.findQuestionByIdAndIsShow(questionRequest.getQuestionId(), "Y").orElseThrow(
                     () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
             );
 
