@@ -260,7 +260,10 @@ public class MemberService {
         long periodOfUse = ChronoUnit.DAYS.between(startedDateByCoupleId.toLocalDate(), LocalDateTime.now().toLocalDate()) + 1L;
 
         // 커플이 모두 답변을 등록한 질문 조회
-        final Long countOpenSelectQuestion = selectQuestionCustomRepository.countOpenSelectQuestionByCouple(couple);
+        Long countOpenSelectQuestion = selectQuestionCustomRepository.countOpenSelectQuestionByCouple(couple);
+        if (countOpenSelectQuestion == null) {
+            countOpenSelectQuestion = 0L;
+        }
 
         return new MemberCurrentSituationResponse(member.getId(), waitingAnswerList, periodOfUse, countOpenSelectQuestion);
     }
